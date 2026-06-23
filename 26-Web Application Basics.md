@@ -602,7 +602,7 @@ https://admin:password@example.com:443/products/search?q=laptop#reviews
 
 ----------------
 
-# 04 - HTTP Messages
+# HTTP Messages
 
 ## What are HTTP Messages?
 
@@ -621,7 +621,6 @@ When you:
 
 your browser sends an **HTTP Request**, and the server sends back an **HTTP Response**.
 
----
 
 # Client-Server Communication
 
@@ -656,7 +655,6 @@ The server processes the request and sends back:
 * Videos
 * API Data
 
----
 
 # Types of HTTP Messages
 
@@ -678,7 +676,6 @@ Purpose:
 * Delete resources
 * Update information
 
----
 
 ## 2. HTTP Response
 
@@ -695,7 +692,6 @@ Purpose:
 * Report errors
 * Redirect users
 
----
 
 # Structure of an HTTP Message
 
@@ -708,7 +704,7 @@ Empty Line
 Body
 ```
 
----
+
 
 # 1. Start Line
 
@@ -734,7 +730,6 @@ Components:
 | /login   | Resource Path |
 | HTTP/1.1 | HTTP Version  |
 
----
 
 ## Response Start Line
 
@@ -752,7 +747,6 @@ Components:
 | 200      | Status Code   |
 | OK       | Reason Phrase |
 
----
 
 # 2. Headers
 
@@ -766,7 +760,6 @@ Key: Value
 
 format.
 
----
 
 ## Request Header Example
 
@@ -776,7 +769,6 @@ User-Agent: Mozilla/5.0
 Cookie: sessionid=abc123
 ```
 
----
 
 ## Response Header Example
 
@@ -786,7 +778,6 @@ Server: nginx
 Content-Length: 1256
 ```
 
----
 
 ## Why Headers Matter
 
@@ -798,7 +789,6 @@ Headers provide information such as:
 * Session information
 * Security policies
 
----
 
 # 3. Empty Line
 
@@ -823,7 +813,6 @@ username=admin
 
 Notice the blank line before the body.
 
----
 
 # 4. Body
 
@@ -836,7 +825,6 @@ For example:
 * GET requests usually have no body.
 * POST requests commonly include a body.
 
----
 
 ## Request Body Example
 
@@ -853,8 +841,6 @@ Body:
 ```text
 username=admin&password=password123
 ```
-
----
 
 ## Response Body Example
 
@@ -885,7 +871,6 @@ Hello User
 </html>
 ```
 
----
 
 # Complete HTTP Request Example
 
@@ -908,7 +893,6 @@ Cookie: sessionid=abc123
 | User-Agent  | Mozilla/5.0 |
 | Body        | None        |
 
----
 
 # Complete HTTP Response Example
 
@@ -934,7 +918,6 @@ Content-Length: 85
 | Content-Type  | text/html    |
 | Body          | HTML Content |
 
----
 
 # Why Understanding HTTP Messages is Important
 
@@ -946,8 +929,6 @@ Helps developers:
 * Create APIs
 * Debug communication issues
 
----
-
 ## Cybersecurity
 
 Helps security professionals:
@@ -957,7 +938,6 @@ Helps security professionals:
 * Test applications
 * Find vulnerabilities
 
----
 
 ## Penetration Testing
 
@@ -991,41 +971,4 @@ Common attacks include:
 
 Proper handling of HTTP messages helps prevent these attacks.
 
-
-# Quick Revision
-
-## HTTP Message Structure
-
-```text
-Start Line
-Headers
-Empty Line
-Body
-```
-
-
-## Message Types
-
-### Request
-
-```text
-Client → Server
-```
-
-### Response
-
-```text
-Server → Client
-```
-
-## Components
-
-| Component  | Purpose                     |
-| ---------- | --------------------------- |
-| Start Line | Identifies request/response |
-| Headers    | Additional information      |
-| Empty Line | Separates headers and body  |
-| Body       | Actual data                 |
-
----
 
