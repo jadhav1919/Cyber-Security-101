@@ -438,3 +438,335 @@ Extends Burp Suite's logging capabilities.
 * Easier traffic analysis
 
  ---------
+
+# Burp Suite Installation Guide
+
+## Overview
+
+Before using Burp Suite for web application security testing, it must be installed on your system.
+
+Burp Suite is available for:
+
+* Linux
+* Windows
+* macOS
+* Kali Linux (pre-installed)
+
+> **Note:** If you are using a TryHackMe AttackBox or a standard Kali Linux installation, Burp Suite is usually already installed.
+
+ 
+
+# Why Install Burp Suite?
+
+Burp Suite is widely used for:
+
+* Web Application Penetration Testing
+* Mobile Application Testing
+* API Security Testing
+* Bug Bounty Hunting
+* Security Research
+* Web Development Debugging
+
+ 
+
+# Downloading Burp Suite
+
+## Official Source
+
+Burp Suite should always be downloaded from the official PortSwigger website:
+
+**Official Website**
+
+[PortSwigger Burp Suite Downloads](https://portswigger.net/burp/releases?utm_source=chatgpt.com)
+
+ 
+
+# Installation by Operating System
+
+## Kali Linux
+
+### Pre-installed Version
+
+Most Kali Linux distributions already include Burp Suite.
+
+### Verify Installation
+
+Open a terminal and run:
+
+```bash
+burpsuite
+```
+
+Or search:
+
+```bash
+which burpsuite
+```
+
+ 
+### Install Using APT
+
+If Burp Suite is missing:
+
+```bash
+sudo apt update
+sudo apt install burpsuite -y
+```
+
+### Verify Installation
+
+```bash
+burpsuite
+```
+
+ 
+
+## Windows
+
+### Step 1: Download
+
+Download the Community Edition installer from the PortSwigger website.
+
+### Step 2: Run Installer
+
+Double-click:
+
+```text
+burpsuite_community_windows.exe
+```
+
+### Step 3: Follow Setup Wizard
+
+Recommended:
+
+* Accept license agreement
+* Keep default installation location
+* Continue with default settings
+
+### Step 4: Launch Burp Suite
+
+Open:
+
+```text
+Start Menu → Burp Suite Community Edition
+```
+
+ 
+
+## Linux (Ubuntu, Debian, Parrot OS, etc.)
+
+### Step 1: Download Installer
+
+Download the Linux installer script.
+
+Example:
+
+```text
+burpsuite_community_linux_v2025.sh
+```
+
+ 
+
+### Step 2: Make Executable
+
+```bash
+chmod +x burpsuite_community_linux.sh
+```
+
+ 
+
+### Step 3: Run Installer
+
+Using sudo:
+
+```bash
+sudo ./burpsuite_community_linux.sh
+```
+
+Without sudo:
+
+```bash
+./burpsuite_community_linux.sh
+```
+
+ 
+
+### Installation Location
+
+If installed without sudo:
+
+```text
+~/BurpSuiteCommunity/BurpSuiteCommunity
+```
+
+Meaning:
+
+```text
+/home/username/BurpSuiteCommunity/BurpSuiteCommunity
+```
+
+ 
+
+### PATH Consideration
+
+Without sudo:
+
+* Burp Suite is installed locally.
+* It is NOT automatically added to PATH.
+
+You may need to launch it manually:
+
+```bash
+~/BurpSuiteCommunity/BurpSuiteCommunity
+```
+
+ 
+
+## macOS
+
+### Step 1: Download
+
+Download the macOS installer from PortSwigger.
+
+### Step 2: Open Installer
+
+Double-click the downloaded file.
+
+### Step 3: Follow Installation Wizard
+
+Accept default options unless customization is required.
+
+### Step 4: Launch
+
+Open Burp Suite from:
+
+```text
+Applications → Burp Suite Community Edition
+```
+
+ 
+
+# Installation Wizard
+
+## Recommended Settings
+
+For beginners, the default settings are usually sufficient.
+
+### Recommended Choices
+
+ Default installation directory
+
+ Default shortcuts
+
+ Default components
+
+ Standard configuration
+
+ 
+
+## Best Practice
+
+Always review:
+
+* Installation path
+* Permissions requested
+* Additional software options
+
+before clicking **Next**.
+
+ 
+
+# Verifying Installation
+
+After installation, launch Burp Suite.
+
+If successful, you should see:
+
+```text
+Burp Suite Community Edition
+```
+
+followed by:
+
+```text
+Project Options
+Temporary Project
+```
+
+on startup.
+
+ 
+
+# Common Linux Commands
+
+## Make Installer Executable
+
+```bash
+chmod +x burpsuite_community_linux.sh
+```
+
+### Explanation
+
+| Part     | Meaning                 |
+| -------- | ----------------------- |
+| chmod    | Change file permissions |
+| +x       | Add execute permission  |
+| filename | Installer script        |
+
+ 
+
+## Run Installer
+
+```bash
+sudo ./burpsuite_community_linux.sh
+```
+
+### Explanation
+
+| Part      | Meaning              |
+| --------- | -------------------- |
+| sudo      | Run as administrator |
+| ./        | Current directory    |
+| script.sh | Installation script  |
+
+ 
+
+# Troubleshooting
+
+## Permission Denied
+
+Error:
+
+```bash
+Permission denied
+```
+
+Solution:
+
+```bash
+chmod +x burpsuite_community_linux.sh
+```
+ 
+
+## Command Not Found
+
+Error:
+
+```bash
+burpsuite: command not found
+```
+
+Possible Causes:
+
+* Not installed
+* Not added to PATH
+
+Solution:
+
+Run directly:
+
+```bash
+~/BurpSuiteCommunity/BurpSuiteCommunity
+```
+
+---
