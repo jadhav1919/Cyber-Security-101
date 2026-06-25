@@ -870,4 +870,898 @@ Display Valid Results
 * Follow redirects with `-r` if appropriate.
 * Re-scan interesting directories manually because Gobuster is not recursive.
 
+-------------
+
+# Gobuster `dns` Mode (Subdomain Enumeration)
+
+## Overview
+
+The **`dns` mode** in Gobuster is used to discover **subdomains** of a target domain through **DNS brute forcing**.
+
+Organizations often host multiple applications or services on different subdomains. Even if the main website is secure, another subdomain may still contain vulnerabilities, making subdomain enumeration an essential step during web application reconnaissance.
+
+> **Example:** A company may secure `example.thm`, but `dev.example.thm` or `shop.example.thm` could still expose sensitive information or outdated software.
+
+
+# What is a Subdomain?
+
+A **subdomain** is an extension of a main domain used to organize different services or applications.
+
+Example:
+
+```text
+example.thm              ← Main Domain
+│
+├── www.example.thm
+├── mail.example.thm
+├── shop.example.thm
+├── blog.example.thm
+└── api.example.thm
+```
+
+### Explanation
+
+| Subdomain | Purpose                |
+| --------- | ---------------------- |
+| **www**   | Main website           |
+| **mail**  | Email services         |
+| **shop**  | E-commerce application |
+| **blog**  | Company blog           |
+| **api**   | API endpoints          |
+
+Each subdomain can host a completely different application.
+
+
+# Why Enumerate Subdomains?
+
+Finding subdomains can reveal:
+
+* Hidden applications
+* Development servers
+* Staging environments
+* Admin portals
+* APIs
+* Legacy systems
+
+Sometimes these systems are less secure than the primary website.
+
+Example:
+
+```text
+example.thm
+```
+
+Secure website.
+
+However,
+
+```text
+dev.example.thm
+```
+
+may contain:
+
+* Default credentials
+* Debug pages
+* Old software
+* Sensitive files
+
+This is why subdomain enumeration is an important part of reconnaissance.
+
+
+# How Gobuster `dns` Works
+
+Gobuster reads each entry from a wordlist and prepends it to the target domain.
+
+```text
+Wordlist
+     │
+     ▼
+Gobuster
+     │
+     ▼
+DNS Server
+     │
+     ▼
+Checks if Subdomain Exists
+```
+
+Example wordlist:
+
+```text
+www
+mail
+shop
+admin
+api
+```
+
+Gobuster queries:
+
+```text
+www.example.thm
+mail.example.thm
+shop.example.thm
+admin.example.thm
+api.example.thm
+```
+
+If the DNS server returns an IP address, Gobuster reports the subdomain.
+
+
+# View Help
+
+Display all available options:
+
+```bash
+gobuster dns --help
+```
+
+This shows every available flag for DNS enumeration.
+
+
+# Important Flags
+
+## `-d` / `--domain`
+
+Specifies the target domain.
+
+### Syntax
+
+```bash
+-d example.thm
+```
+
+Gobuster appends every word from the wordlist before this domain.
+
+Example:
+
+```text
+admin + example.thm
+```
+
+becomes:
+
+```text
+admin.example.thm
+```
+
+
+## `-w`
+
+Specifies the wordlist.
+
+Example:
+
+```bash
+-w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+
+Gobuster reads each word and generates DNS queries.
+
+
+## `-i` / `--show-ips`
+
+Displays the IP address associated with each discovered subdomain.
+
+Example:
+
+```bash
+-i
+```
+
+Output:
+
+```text
+shop.example.thm     192.168.1.15
+```
+
+Useful when identifying which server hosts a particular subdomain.
+
+
+## `-c` / `--show-cname`
+
+Displays the **Canonical Name (CNAME)** record.
+
+A **CNAME** points one domain name to another domain name.
+
+Example:
+
+```text
+shop.example.thm
+      │
+      ▼
+store.example.net
+```
+
+Instead of pointing directly to an IP address, the subdomain points to another hostname.
+
+> **Note:** `--show-cname` cannot be used together with `--show-ips`.
+
+
+## `-r` / `--resolver`
+
+Uses a custom DNS server.
+
+Example:
+
+```bash
+-r 8.8.8.8
+```
+
+Instead of using the system DNS server, Gobuster sends DNS requests to the specified resolver.
+
+Useful in:
+
+* Labs
+* Internal networks
+* Custom DNS environments
+
+
+# Basic Syntax
+
+```bash
+gobuster dns -d example.thm -w /path/to/wordlist
+```
+
+
+# Required Parameters
+
+## `dns`
+
+Enables DNS subdomain enumeration mode.
+
+
+## `-d`
+
+Specifies the target domain.
+
+Example:
+
+```bash
+-d example.thm
+```
+
+Gobuster will enumerate subdomains under:
+
+```text
+example.thm
+```
+
+
+## `-w`
+
+Specifies the wordlist.
+
+Example:
+
+```bash
+-w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+
+Each entry becomes a DNS query.
+
+
+# Complete Example
+
+```bash
+gobuster dns \
+-d example.thm \
+-w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+
+### What this command does
+
+* Uses DNS enumeration mode.
+* Targets `example.thm`.
+* Reads subdomain names from the specified wordlist.
+* Sends DNS queries for each entry.
+* Displays discovered subdomains.
+
+# How Gobuster Generates Queries
+
+Suppose the wordlist contains:
+
+```text
+www
+shop
+academy
+primary
+```
+
+Gobuster automatically creates:
+
+```text
+www.example.thm
+shop.example.thm
+academy.example.thm
+primary.example.thm
+```
+
+Each hostname is sent to the DNS server.
+
+# Sample Output
+
+```text
+=================================================
+Starting gobuster in DNS enumeration mode
+=================================================
+
+Found: www.example.thm
+Found: shop.example.thm
+Found: academy.example.thm
+Found: primary.example.thm
+
+=================================================
+Finished
+=================================================
+```
+
+### Explanation
+
+Gobuster successfully discovered four valid subdomains:
+
+* `www.example.thm`
+* `shop.example.thm`
+* `academy.example.thm`
+* `primary.example.thm`
+
+Each of these should be investigated further because they may host separate web applications.
+
+
+# DNS Enumeration Workflow
+
+```text
+Target Domain
+      │
+      ▼
+Wordlist
+      │
+      ▼
+Gobuster
+      │
+      ▼
+Generate DNS Queries
+      │
+      ▼
+DNS Server
+      │
+      ▼
+Existing Subdomains Found
+```
+
+
+# Best Practices
+
+* Use large, high-quality subdomain wordlists for better coverage.
+* Investigate every discovered subdomain separately.
+* Display IP addresses using `-i` when mapping infrastructure.
+* Use a custom DNS resolver (`-r`) when working in labs or internal environments.
+* Remember that different subdomains may host completely different applications.
+
+--------------
+
+# Gobuster `vhost` Mode (Virtual Host Enumeration)
+
+## Overview
+
+The **`vhost` mode** in Gobuster is used to discover **Virtual Hosts (vHosts)** hosted on the same web server.
+
+A single web server can host multiple websites using the **same IP address**. Instead of relying on different IP addresses, the web server determines which website to serve based on the **Host** header in the HTTP request.
+
+Gobuster brute-forces this **Host** header to discover hidden virtual hosts.
+
+> **Example:** A server with IP `192.168.1.10` may host:
+>
+> * `www.example.thm`
+> * `blog.example.thm`
+> * `shop.example.thm`
+> * `admin.example.thm`
+
+Although all websites share the **same IP**, they are different websites.
+
+  
+# Virtual Host vs Subdomain
+
+Many beginners confuse **Virtual Hosts** with **Subdomains**, but they are not the same.
+
+| Virtual Host                                           | Subdomain                         |
+| ------------------------------------------------------ | --------------------------------- |
+| Configured on the **Web Server** (Apache, Nginx, IIS). | Configured in the **DNS Server**. |
+| Uses the **HTTP Host header**.                         | Uses **DNS records**.             |
+| Multiple websites can share one IP.                    | Requires DNS resolution.          |
+| Found using **Gobuster vhost**.                        | Found using **Gobuster dns**.     |
+
+  
+
+# Example
+
+Imagine a web server with IP:
+
+```text
+192.168.1.20
+```
+
+The server hosts:
+
+```text
+www.example.thm
+blog.example.thm
+shop.example.thm
+admin.example.thm
+```
+
+All of them point to:
+
+```text
+192.168.1.20
+```
+
+The web server decides which website to display by reading:
+
+```http
+Host: blog.example.thm
+```
+
+or
+
+```http
+Host: shop.example.thm
+```
+
+  
+
+# Difference Between `dns` and `vhost`
+
+## Gobuster DNS Mode
+
+```text
+Wordlist
+     │
+     ▼
+DNS Query
+     │
+     ▼
+DNS Server
+     │
+     ▼
+Returns IP Address
+```
+
+Gobuster asks:
+
+> Does `blog.example.thm` exist in DNS?
+
+ 
+
+## Gobuster vHost Mode
+
+```text
+Wordlist
+     │
+     ▼
+HTTP Request
+     │
+     ▼
+Host Header Changes
+     │
+     ▼
+Web Server
+```
+
+Gobuster asks:
+
+> Does the web server respond differently if I send:
+
+```http
+Host: blog.example.thm
+```
+
+  
+# View Help
+
+Display all available options:
+
+```bash
+gobuster vhost --help
+```
+
+This displays every flag supported by the Virtual Host enumeration mode.
+
+ 
+# Important Flags
+
+## `-u` / `--url`
+
+Specifies the target web server.
+
+Example
+
+```bash
+-u http://10.10.10.15
+```
+
+Gobuster sends requests to this server.
+
+ 
+
+## `-w`
+
+Specifies the wordlist.
+
+Example
+
+```bash
+-w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+
+Each word becomes a possible virtual host.
+
+ 
+
+## `--domain`
+
+Specifies the base domain.
+
+Example
+
+```bash
+--domain example.thm
+```
+
+Gobuster combines every word with this domain.
+
+Example
+
+```text
+blog
+```
+
+becomes
+
+```text
+blog.example.thm
+```
+
+ 
+
+## `--append-domain`
+
+Automatically appends the domain to every wordlist entry.
+
+Without this option:
+
+```text
+blog
+shop
+admin
+```
+
+Gobuster sends:
+
+```http
+Host: blog
+Host: shop
+Host: admin
+```
+
+These are invalid hostnames.
+
+With:
+
+```bash
+--append-domain
+```
+
+Gobuster sends:
+
+```http
+Host: blog.example.thm
+Host: shop.example.thm
+Host: admin.example.thm
+```
+
+This produces valid requests.
+
+ 
+
+## `-m` / `--method`
+
+Specifies the HTTP method.
+
+Example
+
+```bash
+-m GET
+```
+
+or
+
+```bash
+-m POST
+```
+
+Normally, **GET** is sufficient.
+
+ 
+
+## `--exclude-length`
+
+Filters responses based on response size.
+
+Example
+
+```bash
+--exclude-length 250-320
+```
+
+Responses whose body size falls between **250** and **320 bytes** will be ignored.
+
+Useful for removing false positives.
+
+ 
+## `-r` / `--follow-redirect`
+
+Automatically follows HTTP redirects.
+
+Useful when virtual hosts redirect users to another page.
+
+ 
+
+# Basic Syntax
+
+```bash
+gobuster vhost \
+-u http://example.thm \
+-w /path/to/wordlist
+```
+
+ 
+
+# Complete Example
+
+```bash
+gobuster vhost \
+-u http://10.48.142.170 \
+--domain example.thm \
+-w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt \
+--append-domain \
+--exclude-length 250-320
+```
+
+ 
+
+# Breaking Down the Command
+
+## `gobuster vhost`
+
+Uses Virtual Host enumeration mode.
+
+ 
+
+## `-u http://10.48.142.170`
+
+Specifies the target web server.
+
+Gobuster connects directly to:
+
+```text
+10.48.142.170
+```
+
+ 
+
+## `--domain example.thm`
+
+Appends:
+
+```text
+example.thm
+```
+
+to every word.
+
+Example:
+
+```text
+blog
+```
+
+becomes
+
+```text
+blog.example.thm
+```
+
+ 
+
+## `-w`
+
+Specifies the wordlist used for brute forcing.
+
+Example entries:
+
+```text
+www
+shop
+academy
+blog
+```
+
+## `--append-domain`
+
+Ensures Gobuster creates valid hostnames.
+
+Without it:
+
+```http
+Host: blog
+```
+
+With it:
+
+```http
+Host: blog.example.thm
+```
+
+
+## `--exclude-length 250-320`
+
+Filters pages whose response size falls between:
+
+```text
+250
+```
+
+and
+
+```text
+320
+```
+
+This removes many false positives.
+
+
+# How Gobuster Changes the Host Header
+
+Suppose the wordlist contains:
+
+```text
+www
+shop
+academy
+blog
+```
+
+Gobuster generates:
+
+```http
+GET / HTTP/1.1
+Host: www.example.thm
+```
+
+Next request:
+
+```http
+GET / HTTP/1.1
+Host: shop.example.thm
+```
+
+Next:
+
+```http
+GET / HTTP/1.1
+Host: academy.example.thm
+```
+
+The only thing changing is the **Host** header.
+
+
+# Understanding the Host Header
+
+Example request:
+
+```http
+GET / HTTP/1.1
+Host: www.example.thm
+User-Agent: gobuster/3.6
+Accept: text/html
+Connection: keep-alive
+```
+
+The Host header has three parts.
+
+```text
+www.example.thm
+```
+
+| Part        | Meaning                               |
+| ----------- | ------------------------------------- |
+| **www**     | Subdomain generated from the wordlist |
+| **example** | Second-Level Domain                   |
+| **thm**     | Top-Level Domain (TLD)                |
+
+Gobuster changes only the first part.
+
+
+# Sample Output
+
+```text
+Found: blog.example.thm Status: 200 [Size: 1493]
+
+Found: shop.example.thm Status: 200 [Size: 2983]
+
+Found: www.example.thm Status: 200 [Size: 84352]
+
+Found: academy.example.thm Status: 200 [Size: 434]
+```
+
+### Explanation
+
+Gobuster discovered four valid virtual hosts:
+
+* blog.example.thm
+* shop.example.thm
+* [www.example.thm](http://www.example.thm)
+* academy.example.thm
+
+Each should be investigated because it may host a different application.
+
+
+# Why Use `--exclude-length`?
+
+Sometimes every request returns:
+
+```text
+404 Page Not Found
+```
+
+but with different Host headers.
+
+Example:
+
+```text
+test.example.thm
+```
+
+returns
+
+```text
+404
+Size: 279
+```
+
+Another:
+
+```text
+random.example.thm
+```
+
+returns
+
+```text
+404
+Size: 278
+```
+
+Gobuster may mistakenly report these as found.
+
+By excluding:
+
+```bash
+--exclude-length 250-320
+```
+
+these false positives disappear.
+
+
+# Best Practices
+
+* Always use `--append-domain` when required.
+* Use `--exclude-length` to filter false positives.
+* Investigate every discovered virtual host individually.
+* Remember that virtual hosts are configured on the web server, not in DNS.
+* Compare response status codes and page sizes to identify valid hosts.
+
 ---
+
