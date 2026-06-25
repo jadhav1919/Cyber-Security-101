@@ -2823,4 +2823,557 @@ Response
 * Use Issue Definitions when documenting vulnerabilities.
 * Pay attention to unusual file names and API endpoints.
 
----
+-----------
+
+
+# Burp Suite Browser (Built-in Chromium)
+
+## Overview
+
+Burp Suite includes a **built-in Chromium browser**, commonly called the **Burp Browser**.
+
+Unlike your regular browser (Firefox, Chrome, etc.), the Burp Browser is **already configured to use Burp Proxy**. This means you can immediately start intercepting HTTP/HTTPS traffic without installing extensions like FoxyProxy or manually changing browser proxy settings.
+
+
+# What is the Burp Browser?
+
+The **Burp Browser** is a customized **Chromium-based browser** that comes bundled with Burp Suite.
+
+### Key Feature
+
+It is **pre-configured** to send all web traffic through the Burp Proxy automatically.
+
+# Why Use the Burp Browser?
+
+Normally, when using Firefox or Chrome, you must:
+
+* Install a proxy extension (e.g., FoxyProxy)
+* Configure the proxy IP
+* Configure the proxy port
+* Enable the proxy
+
+With the Burp Browser:
+
+```text id="6gxq9l"
+Open Browser
+      ↓
+Browse Website
+      ↓
+Traffic Automatically Goes Through Burp
+```
+
+No additional browser configuration is required.
+
+
+# Browser Traffic Flow
+
+### Using a Normal Browser
+
+```text id="r30fop"
+Firefox
+     │
+Configure Proxy
+     │
+     ▼
+Burp Proxy
+     │
+     ▼
+Target Server
+```
+
+
+### Using the Burp Browser
+
+```text id="lkjlwm"
+Burp Browser
+      │
+      ▼
+Burp Proxy
+      │
+      ▼
+Target Server
+```
+
+Everything is already configured.
+
+
+# How to Launch the Burp Browser
+
+## Step 1
+
+Open Burp Suite.
+
+
+## Step 2
+
+Navigate to:
+
+```text id="zghjpw"
+Proxy
+```
+
+
+## Step 3
+
+Click:
+
+```text id="vb3mfq"
+Open Browser
+```
+
+
+## Step 4
+
+A new Chromium browser window opens.
+
+Every request made in this browser is automatically routed through Burp Suite.
+
+
+# Benefits of the Burp Browser
+
+* No manual proxy configuration
+* No FoxyProxy required
+* Automatically trusted by Burp
+* Ready for interception
+* Easy to use during penetration testing
+
+
+# Burp Browser Settings
+
+Burp Browser has many configurable options.
+
+These settings can be found in:
+
+```text id="rjlwmj"
+Settings
+    ↓
+Tools
+    ↓
+Burp's Browser
+```
+
+Examples of configurable options include:
+
+* Browser behavior
+* Security settings
+* Launch options
+* Sandbox configuration
+
+
+# Running Burp Browser on Linux
+
+## The Problem
+
+If Burp Suite is run as the **root user** (common in Kali Linux and TryHackMe AttackBox), the Burp Browser may fail to start.
+
+### Typical Error
+
+The browser cannot create a **sandbox** environment.
+
+
+# What is a Sandbox?
+
+A **sandbox** is an isolated environment that limits what an application can access.
+
+It protects the operating system if the browser is compromised.
+
+```text id="y1v7bn"
+Browser
+     │
+ Sandbox
+     │
+Operating System
+```
+
+If malware exploits the browser, the sandbox helps prevent access to the rest of the system.
+
+
+
+# Why Does the Error Occur?
+
+Linux security mechanisms usually prevent Chromium from creating a sandbox when running as the **root** user.
+
+As a result, Burp Browser refuses to launch.
+
+
+
+# Solution 1 (Recommended)
+
+## Create a Normal User
+
+Instead of running Burp Suite as **root**, create a standard (low-privilege) user and launch Burp Suite from that account.
+
+### Advantages
+
+* Maintains browser sandbox protection.
+* Better security.
+* Recommended for real-world penetration testing.
+
+
+
+# Solution 2 (Easy Option)
+
+If you're using a training environment like the TryHackMe AttackBox, you can disable the sandbox requirement.
+
+### Steps
+
+Go to:
+
+```text id="dgd73t"
+Settings
+      ↓
+Tools
+      ↓
+Burp's Browser
+```
+
+Enable:
+
+```text id="p06wc2"
+Allow Burp's browser to run without a sandbox
+```
+
+Now the Burp Browser will launch even when running as root.
+
+
+
+# Security Warning
+
+ This option is **disabled by default** for security reasons.
+
+Without a sandbox:
+
+```text id="6llwsi"
+Browser
+      │
+      ▼
+Operating System
+```
+
+The browser has greater access to your system.
+
+If the browser is compromised, an attacker could potentially gain access to your machine.
+
+
+
+# Should You Disable the Sandbox?
+
+### In Training Environments (TryHackMe, Labs)
+
+ Generally acceptable.
+
+The environment is isolated and intended for learning.
+
+
+
+### On Your Personal or Production Machine
+
+ Not recommended.
+
+Keep the sandbox enabled whenever possible.
+
+
+
+# Comparison
+
+| Feature              | Burp Browser | Firefox + FoxyProxy |
+| -------------------- | ------------ | ------------------- |
+| Proxy Pre-configured |  Yes        |  No                  |
+| Requires Extension   |  No         |  Yes                 |
+| Easy Setup           |  Yes        | Moderate             |
+| Built into Burp      |  Yes        |  No                  |
+
+
+# Best Practices
+
+* Use the Burp Browser for quick testing.
+* Use Firefox + FoxyProxy when you need your preferred browser or specific extensions.
+* Avoid disabling the sandbox on personal systems.
+* Run Burp Suite as a standard user whenever possible.
+
+-----------
+
+
+# Configuring Firefox to Trust the Burp Suite CA Certificate
+
+## Overview
+
+When using Burp Suite to intercept **HTTPS (TLS-encrypted)** traffic, your browser may display a security warning or certificate error.
+
+This happens because Burp Suite acts as a **Man-in-the-Middle (MITM) proxy**, presenting its own certificate instead of the website's original certificate. Since Firefox does not trust Burp Suite's **PortSwigger Certificate Authority (CA)** by default, it warns that the connection is not secure.
+
+To resolve this issue, you must import the **PortSwigger CA Certificate** into Firefox's list of trusted Certificate Authorities.
+
+> **Note:** If you are using the **TryHackMe AttackBox**, this configuration is already completed, so you can safely skip these steps.
+
+
+# Why Does the Certificate Error Occur?
+
+Normally, HTTPS communication looks like this:
+
+```text
+Browser
+    │
+    │ Trusted TLS Certificate
+    ▼
+Target Website
+```
+
+The browser verifies that the website's certificate is signed by a trusted Certificate Authority (CA).
+
+
+## With Burp Suite Proxy
+
+When Burp Proxy intercepts HTTPS traffic:
+
+```text
+Browser
+    │
+    ▼
+Burp Suite
+    │
+    ▼
+Target Website
+```
+
+Burp decrypts the HTTPS traffic, inspects it, and then re-encrypts it before forwarding it to the website.
+
+To do this, Burp generates its own certificate for each website.
+
+Example:
+
+```text
+https://google.com
+        ↓
+Certificate Presented by Burp Suite
+```
+
+Since Firefox does **not** trust Burp's certificate, it displays a warning.
+
+
+# What is a Certificate Authority (CA)?
+
+A **Certificate Authority (CA)** is a trusted organization or entity that issues digital certificates to verify the identity of websites.
+
+Examples of well-known CAs include:
+
+* DigiCert
+* Let's Encrypt
+* GlobalSign
+* Sectigo
+
+Burp Suite creates its **own local CA**, called the **PortSwigger CA**, which is only trusted after you import it into your browser.
+
+
+# Solution
+
+Import the **PortSwigger CA Certificate** into Firefox.
+
+After importing it, Firefox trusts certificates generated by Burp Suite, allowing HTTPS traffic to be intercepted without browser warnings.
+
+
+# Step 1 – Enable Burp Proxy
+
+Ensure that:
+
+* Burp Suite is running.
+* Your browser is configured to use Burp Proxy.
+
+
+# Step 2 – Download the Burp CA Certificate
+
+Open your browser and visit:
+
+```text
+http://burp/cert
+```
+
+Burp Suite automatically provides its CA certificate.
+
+A file named:
+
+```text
+cacert.der
+```
+
+will be downloaded.
+
+
+## What is `cacert.der`?
+
+* `ca` = Certificate Authority
+* `cert` = Certificate
+* `.der` = Binary certificate format
+
+This file contains Burp Suite's CA certificate.
+
+
+# Step 3 – Open Firefox Certificate Manager
+
+In Firefox, type the following into the address bar:
+
+```text
+about:preferences
+```
+
+Press **Enter**.
+
+
+# Step 4 – Search for Certificates
+
+In the Settings page:
+
+1. Search for **Certificates**.
+2. Click:
+
+```text
+View Certificates
+```
+
+This opens Firefox's **Certificate Manager**.
+
+
+# Step 5 – Import the CA Certificate
+
+Inside the Certificate Manager:
+
+1. Click **Import**.
+2. Select the downloaded file:
+
+```text
+cacert.der
+```
+
+
+# Step 6 – Trust the Certificate
+
+A dialog box appears asking what the certificate should be trusted for.
+
+Enable:
+
+```text
+ Trust this CA to identify websites
+```
+
+Click **OK**.
+
+
+# What Happens After Importing?
+
+Firefox now trusts Burp Suite's Certificate Authority.
+
+HTTPS traffic flows like this:
+
+```text
+Browser
+      │
+      ▼
+Burp Suite
+      │
+      ▼
+HTTPS Website
+```
+
+No security warnings appear because Firefox recognizes Burp's CA as trusted.
+
+
+# Before Importing the Certificate
+
+```text
+Browser
+      │
+      ▼
+Burp Certificate
+      │
+      ▼
+ Certificate Not Trusted
+```
+
+Result:
+
+* HTTPS warning
+* Connection blocked
+* Browser security error
+
+
+# After Importing the Certificate
+
+```text
+Browser
+      │
+      ▼
+Burp Certificate
+      │
+      ▼
+Trusted
+```
+
+Result:
+
+* HTTPS loads normally
+* Burp can intercept encrypted traffic
+* No certificate warning
+
+
+# Why is HTTPS Interception Possible?
+
+Burp Suite performs a controlled **Man-in-the-Middle (MITM)** operation.
+
+It:
+
+1. Receives encrypted traffic from the browser.
+2. Decrypts it.
+3. Allows you to inspect or modify it.
+4. Re-encrypts the traffic.
+5. Sends it to the destination server.
+
+Because your browser trusts Burp's CA, this process is seamless.
+
+# Security Considerations
+
+### Why isn't the PortSwigger CA trusted by default?
+
+For security reasons.
+
+If any application could automatically install trusted CAs, attackers could intercept encrypted traffic without the user's knowledge.
+
+
+### Should you trust the Burp CA permanently?
+
+Only on systems used for penetration testing or lab environments.
+
+Avoid leaving unnecessary trusted certificates installed on production or personal systems.
+
+
+# Troubleshooting
+
+## HTTPS Certificate Warning Still Appears
+
+Check that:
+
+* Burp Suite is running.
+* Proxy is enabled.
+* The correct `cacert.der` file was imported.
+* "Trust this CA to identify websites" is checked.
+* Firefox is using the imported certificate.
+
+
+## `http://burp/cert` Doesn't Open
+
+Possible causes:
+
+* Burp Suite is not running.
+* Browser is not using Burp Proxy.
+* Proxy settings are incorrect.
+
+
+# Best Practices
+
+* Import the Burp CA only in testing environments.
+* Remove the certificate if it is no longer needed.
+* Never install unknown CA certificates.
+* Use separate browser profiles for penetration testing.
+
+---------
+
+
