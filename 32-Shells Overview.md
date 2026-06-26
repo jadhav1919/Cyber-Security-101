@@ -891,3 +891,18 @@ Features:
 | Usually temporary.                   | Can remain on the server for long-term access. |
 
 ---
+
+
+some ref links:
+
+https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+
+https://github.com/flozz/p0wny-shell
+
+https://github.com/b374k/b374k
+
+
+https://www.r57shell.net/index.php
+
+
+
