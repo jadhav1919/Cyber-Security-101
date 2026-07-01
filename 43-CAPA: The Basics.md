@@ -1,4 +1,4 @@
-# CAPA (Common Analysis Platform for Artifacts) - Beginner Notes
+# CAPA (Common Analysis Platform for Artifacts)
 
 ## What is CAPA?
 
