@@ -854,5 +854,727 @@ FLOSS automatically:
 * Configuration recovery
 * Reverse engineering
 ----------------
+------------------
+
+# FlareVM Practical Malware Investigation Notes (Complete)
+
+This task demonstrates a **real-world malware triage workflow** using multiple tools available in FlareVM. The investigation begins with **static analysis**, then moves to **dynamic analysis** to observe runtime behavior and network communication.
+
+# Investigation Scenario
+
+**Incident**
+
+A suspicious executable named:
+
+```text
+windows.exe
+```
+
+was downloaded by a user on:
+
+```text
+09/24/2024
+03:43 AM
+```
+
+The SOC (Security Operations Center) flagged the download as suspicious and requested malware analysis.
+
+Location:
+
+```text
+C:\Users\Administrator\Desktop\Sample
+```
+
 ---
+
+# Investigation Workflow
+
+```text
+Suspicious File
+        │
+        ▼
+PEStudio
+(Static Analysis)
+        │
+        ▼
+FLOSS
+(String Extraction)
+        │
+        ▼
+Run Sample
+(Dynamic Analysis)
+        │
+        ▼
+Process Explorer
+(Process + TCP Connections)
+        │
+        ▼
+Process Monitor
+(Verify Runtime Activity)
+        │
+        ▼
+Conclusion
+```
+
+---
+
+# Step 1 Static Analysis using PEStudio
+
+## Purpose
+
+PEStudio performs **static analysis**.
+
+It inspects the executable **without running it**.
+
+## Information Obtained
+
+### File Hashes
+
+MD5
+
+```text
+9FDD4767DE5AEC8E577C1916ECC3E1D6
+```
+
+SHA1
+
+```text
+A1BC55A7931BFCD24651357829C460FD3DC4828F
+```
+
+## Why Hashes Matter
+
+Hashes uniquely identify a file.
+
+They help analysts:
+
+* Verify file integrity
+* Search malware databases
+* Compare samples
+* Identify known malware
+
+Common services:
+
+* VirusTotal
+* MalwareBazaar
+* Hybrid Analysis
+
+If no detection exists:
+
+* Could be a new malware
+* Could be modified malware
+* Could be a custom attack
+
+---
+
+# Suspicious File Description
+
+PEStudio shows:
+
+```text
+Windows Registry Editor
+(REGEDIT)
+```
+
+This appears legitimate.
+
+However:
+
+Actual location:
+
+```text
+C:\Users\Administrator\Desktop\Sample
+```
+
+Legitimate Registry Editor resides in:
+
+```text
+C:\Windows\System32\regedit.exe
+```
+
+---
+
+## Why Suspicious?
+
+Malware often impersonates legitimate Windows programs.
+
+Examples:
+
+```text
+explorer.exe
+svchost.exe
+regedit.exe
+services.exe
+chrome.exe
+```
+
+This technique is called:
+
+## Masquerading
+
+(MITRE ATT&CK T1036)
+
+Purpose:
+
+* Trick users
+* Evade detection
+* Blend with Windows
+
+# Version Information
+
+PEStudio displays metadata containing Russian text.
+
+Example:
+
+```text
+Редактор реестра
+```
+
+Translation:
+
+```text
+Registry Editor
+```
+
+Another entry:
+
+```text
+Операционная система Microsoft Windows
+```
+
+Translation:
+
+```text
+Microsoft Windows Operating System
+```
+
+## Why Suspicious?
+
+If the organization:
+
+* Does not use Russian
+* Has no Russian users
+
+Russian metadata may indicate:
+
+* Foreign malware
+* Malware builder
+* Compiled on Russian system
+
+It is **not proof**, but an investigation clue.
+
+# Missing Rich Header
+
+PEStudio reports:
+
+```text
+Rich Header
+Not Present
+```
+
+## What is Rich Header?
+
+The Rich Header stores:
+
+* Compiler information
+* Linker information
+* Build environment
+
+Many malware authors remove it.
+
+Reasons:
+
+* Prevent attribution
+* Evade static analysis
+* Hide compiler details
+
+
+
+## Investigation Meaning
+
+Missing Rich Header may indicate:
+
+* Packing
+* Obfuscation
+* Malware
+* Manual modification
+
+# Import Address Table (IAT)
+
+PEStudio lists imported APIs.
+
+These APIs reveal what malware is capable of doing.
+
+
+# Important Imported APIs
+
+## 1. UseShellExecute
+
+```text
+UseShellExecute
+```
+
+Purpose
+
+Allows Windows Shell to launch another process.
+
+Used by malware to:
+
+* Launch PowerShell
+* Launch CMD
+* Launch payloads
+* Execute downloaded malware
+
+## 2. CryptoStream
+
+```text
+CryptoStream
+```
+
+Purpose
+
+Encrypts or decrypts data.
+
+Possible malware usage:
+
+* Encrypt stolen data
+* Encrypt C2 traffic
+* Encrypt files
+
+
+## 3. RijndaelManaged
+
+```text
+RijndaelManaged
+```
+
+Purpose
+
+Implements AES encryption.
+
+Possible malware usage:
+
+* File encryption
+* Ransomware
+* Secure communication
+
+
+## 4. CipherMode
+
+```text
+CipherMode
+```
+
+Purpose
+
+Defines encryption mode.
+
+Examples:
+
+* CBC
+* ECB
+* CFB
+
+## 5. CreateDecryptor
+
+```text
+CreateDecryptor
+```
+
+Purpose
+
+Decrypt encrypted data.
+
+Possible malware usage:
+
+* Decrypt payload
+* Decode configuration
+* Decrypt strings
+
+# Static Analysis Conclusion
+
+The executable appears capable of:
+
+* Launching processes
+* Encrypting data
+* Decrypting payloads
+
+This suggests ransomware or loader-like behavior.
+
+
+# Step 2  String Extraction using FLOSS
+
+## Command
+
+```powershell
+FLOSS.exe .\windows.exe > windows.txt
+```
+
+## Command Breakdown
+
+```powershell
+FLOSS.exe
+```
+
+Runs FLOSS.
+
+```powershell
+.\windows.exe
+```
+
+Target file.
+
+```powershell
+>
+```
+
+Redirect output.
+
+```powershell
+windows.txt
+```
+
+Save extracted strings.
+
+## FLOSS Output
+
+Example
+
+```text
+WARNING:
+.NET string extraction not supported
+
+INFO:
+Extracting static strings
+
+Finished
+```
+
+## Findings
+
+Near the bottom of the report:
+
+FLOSS extracted strings similar to:
+
+```text
+UseShellExecute
+
+CryptoStream
+
+CipherMode
+
+CreateDecryptor
+
+RijndaelManaged
+```
+
+## Why Important?
+
+The same APIs were seen in PEStudio.
+
+Finding identical indicators using multiple tools increases confidence.
+
+This process is called:
+
+## Cross Validation
+
+Never trust only one tool.
+
+Always verify using another.
+
+# Static Analysis Summary
+
+Evidence collected:
+
+ Cryptographic APIs
+
+ Process creation APIs
+
+ Suspicious metadata
+
+ Fake Registry Editor
+
+ Missing Rich Header
+
+-------------
+
+# Step 3 — Dynamic Analysis
+
+Now execute malware inside the isolated FlareVM.
+
+Target:
+
+```text
+cobaltstrike.exe
+```
+
+# Process Explorer
+
+Purpose
+
+Observe runtime behavior.
+
+## After execution
+
+Open:
+
+```text
+Process Explorer
+```
+Example Process Tree
+
+```text
+explorer.exe
+        │
+        └── cobaltstrike.exe
+```
+
+## Parent Process
+
+```text
+explorer.exe
+```
+
+Reason:
+
+User manually launched malware.
+
+
+## Child Process
+
+```text
+cobaltstrike.exe
+```
+
+## Investigation Value
+
+Process Explorer shows:
+
+* Parent process
+* Child process
+* Process ID
+* Executable path
+* Loaded DLLs
+* Network connections
+
+# TCP/IP Tab
+
+Open:
+
+```
+Right Click
+
+Properties
+
+TCP/IP
+```
+
+Displays:
+
+* Remote IP
+* Local Port
+* Remote Port
+* Connection State
+
+
+
+Observed Connection
+
+Destination IP
+
+```text
+47.120.46.210
+```
+
+This suggests malware is contacting a remote server.
+
+Possible purposes:
+
+* Command & Control (C2)
+* Download payload
+* Upload stolen data
+* Beaconing
+
+# Step 4 — Verification using Process Monitor
+
+Never rely on a single tool.
+
+Verify findings.
+
+
+Open:
+
+```text
+Process Monitor
+```
+
+# Filtering
+
+Shortcut:
+
+```text
+CTRL + L
+```
+
+Create Filter
+
+```
+Now, using this filter involves several steps. This includes:
+1.Select the Process Name
+2.Select contains
+3.type any value containing any word related to the process. In this case, cobalt
+4.Click include
+5.And then Add and Click on Apply
+6.You should be able to see the conditions added.
+```
+
+This removes unrelated Windows activity.
+
+
+# Observations
+
+Process Monitor confirms:
+
+* Malware starts
+* Executes APIs
+* Opens files
+* Contacts remote IP
+
+The observed network communication matches Process Explorer.
+
+# Verified IOC
+
+Remote IP
+
+```text
+47.120.46.210
+```
+
+# Why Verification Matters
+
+Process Explorer:
+
+Shows current connection.
+
+Process Monitor:
+
+Shows detailed system events.
+
+Both tools confirm:
+
+```text
+cobaltstrike.exe
+
+↓
+
+Connected to
+
+47.120.46.210
+```
+
+Confidence increases because two independent tools agree.
+
+# Indicators of Compromise (IOCs)
+
+## File
+
+```text
+windows.exe
+```
+
+## Location
+
+```text
+C:\Users\Administrator\Desktop\Sample
+```
+
+## MD5
+
+```text
+9FDD4767DE5AEC8E577C1916ECC3E1D6
+```
+
+## SHA1
+
+```text
+A1BC55A7931BFCD24651357829C460FD3DC4828F
+```
+
+## Remote IP
+
+```text
+47.120.46.210
+```
+
+## Suspicious APIs
+
+```text
+UseShellExecute
+
+CryptoStream
+
+CipherMode
+
+CreateDecryptor
+
+RijndaelManaged
+```
+
+## Suspicious Behaviors
+
+* Masquerading as Registry Editor
+* Missing Rich Header
+* Uses cryptographic APIs
+* Creates processes
+* Connects to unknown remote IP
+* Possible malware loader
+* Possible ransomware functionality
+
+
+# Complete Investigation Flow
+
+```text
+User downloads:
+
+windows.exe
+        │
+        ▼
+PEStudio
+│
+├── MD5
+├── SHA1
+├── Russian metadata
+├── Missing Rich Header
+├── Imported APIs
+│
+▼
+FLOSS
+│
+├── Extract strings
+├── Confirm APIs
+│
+▼
+Run Malware
+│
+▼
+Process Explorer
+│
+├── Parent Process
+├── Child Process
+├── TCP/IP Connection
+│
+▼
+Process Monitor
+│
+├── Filter Process
+├── Observe Runtime
+├── Verify Network Activity
+│
+▼
+Confirmed IOC
+
+47.120.46.210
+```
+
+-----------
 
